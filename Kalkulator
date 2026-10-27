@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ffffff">
+  <title>Penjumlahan dengan Java Skrip</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      padding: 28px 16px;
+      background: #fff;
+      color: #17283c;
+      font-family: Inter, "Segoe UI", Arial, sans-serif;
+    }
+
+    .calculator {
+      width: min(100%, 700px);
+    }
+
+    h1 {
+      margin: 0 0 22px;
+      font-size: clamp(25px, 5vw, 32px);
+      letter-spacing: -.04em;
+      text-align: center;
+    }
+
+    .workspace {
+      padding: clamp(20px, 5vw, 34px);
+      border: 1px solid #e4ebef;
+      border-radius: 20px;
+      background: #fff;
+      box-shadow: 0 16px 50px rgb(24 48 67 / 8%);
+    }
+
+    .field {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #34465c;
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    input,
+    select {
+      width: 100%;
+      min-height: 52px;
+      padding: 0 15px;
+      border: 1px solid #dce3ea;
+      border-radius: 11px;
+      outline: none;
+      background: #fff;
+      color: #17283c;
+      font: inherit;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: #168a78;
+      box-shadow: 0 0 0 4px rgb(22 138 120 / 12%);
+    }
+
+    input::placeholder {
+      color: #9ba6b4;
+    }
+
+    .number-row,
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .actions {
+      margin-top: 8px;
+    }
+
+    button {
+      min-height: 52px;
+      padding: 0 20px;
+      border: 0;
+      border-radius: 12px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .calculate {
+      background: #168a78;
+      color: #fff;
+    }
+
+    .calculate:hover {
+      background: #117362;
+    }
+
+    .reset {
+      border: 1px solid #dce5e9;
+      background: #fff;
+      color: #526276;
+    }
+
+    .reset:hover {
+      background: #f4f8f8;
+    }
+
+    .result {
+      margin-top: 20px;
+      padding: 17px 18px;
+      border: 1px solid #d7ebe6;
+      border-radius: 14px;
+      background: #f3faf8;
+    }
+
+    .result-caption {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      color: #638078;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .result-symbol,
+    output {
+      color: #147b6b;
+    }
+
+    .result-symbol {
+      font-size: 16px;
+      letter-spacing: 0;
+    }
+
+    output {
+      display: block;
+      min-height: 36px;
+      font-size: clamp(24px, 7vw, 32px);
+      font-weight: 700;
+      overflow-wrap: anywhere;
+    }
+
+    @media (max-width: 460px) {
+      .number-row {
+        grid-template-columns: 1fr;
+        gap: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="calculator">
+    <h1>Penjumlahan dengan Java Skrip</h1>
+
+    <section class="workspace" aria-label="Kalkulator">
+      <form id="calculator-form">
+        <div class="field">
+          <label for="operation">Pilih operasi</label>
+          <select id="operation" name="operation">
+            <option value="add">Penjumlahan (+)</option>
+            <option value="subtract">Pengurangan (−)</option>
+            <option value="multiply">Perkalian (×)</option>
+            <option value="divide">Pembagian (÷)</option>
+            <option value="power">Pangkat (xʸ)</option>
+            <option value="remainder">Sisa bagi (%)</option>
+          </select>
+        </div>
+
+        <div class="number-row">
+          <div class="field">
+            <label for="number-a">Angka pertama</label>
+            <input id="number-a" name="number-a" type="number" step="any" placeholder="Contoh: 24" required>
+          </div>
+          <div class="field">
+            <label for="number-b">Angka kedua</label>
+            <input id="number-b" name="number-b" type="number" step="any" placeholder="Contoh: 6" required>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="calculate" type="submit">Hitung sekarang</button>
+          <button class="reset" type="reset">Reset angka</button>
+        </div>
+      </form>
+
+      <section class="result" aria-live="polite" aria-atomic="true">
+        <div class="result-caption">
+          <span>Hasil perhitungan</span>
+          <span class="result-symbol" id="result-symbol" aria-hidden="true">+</span>
+        </div>
+        <output id="result">Hasil akan muncul di sini</output>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    const form = document.querySelector("#calculator-form");
+    const operation = document.querySelector("#operation");
+    const inputA = document.querySelector("#number-a");
+    const inputB = document.querySelector("#number-b");
+    const result = document.querySelector("#result");
+    const resultSymbol = document.querySelector("#result-symbol");
+    const numberFormat = new Intl.NumberFormat("id-ID", {
+      maximumFractionDigits: 10
+    });
+
+    const operations = {
+      add: { symbol: "+", calculate: (a, b) => a + b },
+      subtract: { symbol: "−", calculate: (a, b) => a - b },
+      multiply: { symbol: "×", calculate: (a, b) => a * b },
+      divide: { symbol: "÷", calculate: (a, b) => a / b },
+      power: { symbol: "xʸ", calculate: (a, b) => a ** b },
+      remainder: { symbol: "%", calculate: (a, b) => a % b }
+    };
+
+    operation.addEventListener("change", () => {
+      resultSymbol.textContent = operations[operation.value].symbol;
+      result.textContent = "Hasil akan muncul di sini";
+    });
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      if (!form.reportValidity()) {
+        return;
+      }
+
+      const a = Number(inputA.value);
+      const b = Number(inputB.value);
+
+      if (operation.value === "divide" && b === 0) {
+        result.textContent = "Tidak dapat membagi dengan nol.";
+        return;
+      }
+
+      const answer = operations[operation.value].calculate(a, b);
+      result.textContent = Number.isFinite(answer)
+        ? numberFormat.format(answer)
+        : "Hasil tidak dapat ditampilkan.";
+    });
+
+    form.addEventListener("reset", () => {
+      resultSymbol.textContent = operations.add.symbol;
+      result.textContent = "Hasil akan muncul di sini";
+    });
+  </script>
+</body>
+</html>
